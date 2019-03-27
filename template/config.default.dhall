@@ -7,6 +7,8 @@
     branch = "",
     version = "",
     build = "",
+    maxSurge = 1,
+    maxUnavailable = 0,
     environmentVariables = [] : List { mapKey : Text, mapValue : Text },
     host = [] : List ../../dhall-k8s/api/Deployment/Host,
     mount = [] : List ../types/mount.dhall,

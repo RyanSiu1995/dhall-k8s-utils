@@ -33,6 +33,8 @@ let spec : ./dhall-k8s/api/Deployment/Deployment =
    {
      name = serviceConfig.name,
      replicas = serviceConfig.replicas,
+     maxSurge = serviceConfig.maxSurge,
+     maxUnavailable = serviceConfig.maxUnavailable,
      containers = [
         ./dhall-k8s/api/Deployment/defaultContainer //
         {
