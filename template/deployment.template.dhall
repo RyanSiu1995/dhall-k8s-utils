@@ -40,6 +40,7 @@ let spec : ./dhall-k8s/api/Deployment/Deployment =
           imageName = serviceConfig.image,
           imageTag = serviceConfig.version,
           envVars = serviceConfig.environmentVariables,
+          command = serviceConfig.command,
           mounts = map Mount { name : Text, mountPath : Text, readOnly : Optional Bool } mountMapper serviceConfig.mount,
           port = Some (map Port Natural portMapper serviceConfig.port),
           livenessProbe = Some (healthcheckMapper serviceConfig.healthcheck),

@@ -11,6 +11,7 @@
     host = [] : List ../../dhall-k8s/api/Deployment/Host,
     mount = [] : List ../types/mount.dhall,
     nodeSelectors = [] : List { mapKey : Text, mapValue :Text },
+    command = None (List Text),
     healthcheck = {
         port = 80,
         endpoint = "/",
