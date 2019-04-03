@@ -1,6 +1,7 @@
 let global = ./config.dhall
 let serviceConfig = global.{{{service}}}
 let map = ./utils/prelude/list_map.dhall
+let filter = ./utils/prelude/list_filter.dhall
 
 let Secret = ./utils/types/secret.dhall
 let Mount = ./utils/types/mount.dhall
@@ -9,7 +10,10 @@ let HealthCheck = ./utils/types/healthcheck.dhall
 let Probe = ./dhall-k8s/api/Deployment/Probe
 
 let secretMapper = \(a: Secret) -> a.username
-let volumeMapper = \(a: Mount) -> { name = a.name , path = a.target }
+let pathVolumeMapper = \(a: List Mount) ->
+   map Mount { name : Text, path : Text }(\(a: Mount) -> { name = a.name, path = a.target }) (filter Mount (\(b: Mount) -> b.nfs == False) a)
+let nfsVolumeMapper = \(a: List Mount) ->
+   map Mount { name : Text, ip : Text }(\(a: Mount) -> { name = a.name, ip = a.target }) (filter Mount (\(b: Mount) -> b.nfs) a)
 let mountMapper = \(a: Mount) -> { name = a.name , mountPath = a.mountPoint , readOnly = Some False}
 
 let imageSecret =
@@ -51,7 +55,8 @@ let spec : ./dhall-k8s/api/Deployment/Deployment =
      ],
      imagePullSecrets = imageSecret,
      host = serviceConfig.host,
-     pathVolumes = map Mount {name : Text, path : Text} volumeMapper serviceConfig.mount,
+     pathVolumes = pathVolumeMapper serviceConfig.mount,
+     nfsVolumes = nfsVolumeMapper serviceConfig.mount,
      nodeSelectors = serviceConfig.nodeSelectors
    }
 

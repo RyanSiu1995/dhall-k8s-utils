@@ -1,5 +1,6 @@
 {
   name : Text,
   target : Text,
-  mountPoint : Text
+  mountPoint : Text,
+  nfs : Bool
 }
