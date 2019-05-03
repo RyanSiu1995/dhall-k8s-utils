@@ -11,7 +11,9 @@ let Probe = ./dhall-k8s/api/Deployment/Probe
 
 let secretMapper = \(a: Secret) -> a.username
 let pathVolumeMapper = \(a: List Mount) ->
-   map Mount { name : Text, path : Text }(\(a: Mount) -> { name = a.name, path = a.target }) (filter Mount (\(b: Mount) -> b.nfs == False) a)
+   map Mount { name : Text, path : Text }(\(a: Mount) -> { name = a.name, path = a.target }) (filter Mount (\(b: Mount) -> b.nfs == False && b.secret == False) a)
+let secretVolumeMapper = \(a: List Mount) ->
+   map Mount { name : Text }(\(a: Mount) -> { name = a.target }) (filter Mount (\(b: Mount) -> b.secret) a)
 let nfsVolumeMapper = \(a: List Mount) ->
    map Mount { name : Text, ip : Text }(\(a: Mount) -> { name = a.name, ip = a.target }) (filter Mount (\(b: Mount) -> b.nfs) a)
 let mountMapper = \(a: Mount) -> { name = a.name , mountPath = a.mountPoint , readOnly = Some False}
@@ -56,6 +58,7 @@ let spec : ./dhall-k8s/api/Deployment/Deployment =
      imagePullSecrets = imageSecret,
      host = serviceConfig.host,
      pathVolumes = pathVolumeMapper serviceConfig.mount,
+     secretVolumes = secretVolumeMapper serviceConfig.mount,
      nfsVolumes = nfsVolumeMapper serviceConfig.mount,
      nodeSelectors = serviceConfig.nodeSelectors
    }

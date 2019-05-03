@@ -2,5 +2,6 @@
   name : Text,
   target : Text,
   mountPoint : Text,
-  nfs : Bool
+  nfs : Bool,
+  secret : Bool
 }
