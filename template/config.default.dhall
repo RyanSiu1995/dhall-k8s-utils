@@ -14,11 +14,5 @@
     mount = [] : List ../types/mount.dhall,
     nodeSelectors = [] : List { mapKey : Text, mapValue :Text },
     command = None (List Text),
-    healthcheck = {
-        port = 80,
-        endpoint = "/",
-        startTime = 1,
-        retry = 1,
-        interval = 1
-    } : ../types/healthcheck.dhall
+    healthcheck = None ../types/healthcheck.dhall
 }

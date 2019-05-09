@@ -2,6 +2,8 @@ let global = ./config.dhall
 let serviceConfig = global.{{{service}}}
 let map = ./utils/prelude/list_map.dhall
 let filter = ./utils/prelude/list_filter.dhall
+let optionalNull = ./utils/prelude/optional_null.dhall
+let optionalMap = ./utils/prelude/optional_map.dhall
 
 let Secret = ./utils/types/secret.dhall
 let Mount = ./utils/types/mount.dhall
@@ -25,14 +27,8 @@ let portMapper =
   \(port : Port) -> port.containerPort
 
 let healthcheckMapper =
-  \(health : HealthCheck) ->
-    {
-      initial = health.startTime,
-      period = health.interval,
-      failureThreshold = health.retry,
-      path = health.endpoint,
-      port = health.port
-    } : Probe
+  \(health : Optional HealthCheck) ->
+    optionalMap HealthCheck Probe (\(a: HealthCheck) -> {initial = a.startTime, period = a.interval, failureThreshold = a.retry, path = a.endpoint,  port = a.port }) health
 
 let spec : ./dhall-k8s/api/Deployment/Deployment =
    ./dhall-k8s/api/Deployment/default //
@@ -51,8 +47,8 @@ let spec : ./dhall-k8s/api/Deployment/Deployment =
           command = serviceConfig.command,
           mounts = map Mount { name : Text, mountPath : Text, readOnly : Optional Bool } mountMapper serviceConfig.mount,
           port = Some (map Port Natural portMapper serviceConfig.port),
-          livenessProbe = Some (healthcheckMapper serviceConfig.healthcheck),
-          readinessProbe = Some (healthcheckMapper serviceConfig.healthcheck)
+          livenessProbe = healthcheckMapper serviceConfig.healthcheck,
+          readinessProbe = healthcheckMapper serviceConfig.healthcheck
         }
      ],
      imagePullSecrets = imageSecret,
