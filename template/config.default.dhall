@@ -14,5 +14,6 @@
     mount = [] : List ../types/mount.dhall,
     nodeSelectors = [] : List { mapKey : Text, mapValue :Text },
     command = None (List Text),
+    initCommands = [] : (List { mapKey : Text, mapValue : (List Text) }),
     healthcheck = None ../types/healthcheck.dhall
 }

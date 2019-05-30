@@ -26,6 +26,20 @@ let imageSecret =
 let portMapper =
   \(port : Port) -> port.containerPort
 
+let initContainerMapper =
+  \(imageName : Text) ->
+  \(imageTag : Text) ->
+  \(envVars : List { mapKey : Text, mapValue : Text }) ->
+  \(command : { mapKey : Text, mapValue : (List Text)}) ->
+    ./dhall-k8s/api/Deployment/defaultContainer //
+    {
+       name = command.mapKey,
+       imageName = imageName,
+       imageTag = imageTag,
+       command = Some command.mapValue,
+       envVars = envVars
+    }
+
 let healthcheckMapper =
   \(health : Optional HealthCheck) ->
     optionalMap HealthCheck Probe (\(a: HealthCheck) -> {initial = a.startTime, period = a.interval, failureThreshold = a.retry, path = a.endpoint,  port = a.port }) health
@@ -53,6 +67,7 @@ let spec : ./dhall-k8s/api/Deployment/Deployment =
      ],
      imagePullSecrets = imageSecret,
      host = serviceConfig.host,
+     initContainers = map { mapKey : Text, mapValue : (List Text) } ./dhall-k8s/api/Deployment/Container (initContainerMapper serviceConfig.image serviceConfig.version serviceConfig.environmentVariables) serviceConfig.initCommands,
      pathVolumes = pathVolumeMapper serviceConfig.mount,
      secretVolumes = secretVolumeMapper serviceConfig.mount,
      nfsVolumes = nfsVolumeMapper serviceConfig.mount,
